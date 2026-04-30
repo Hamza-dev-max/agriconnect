@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+
+{% block title %}📊 Analyse de Données - agriconnect{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-4">
+        <h1 class="display-4 fw-bold text-white">
+            <i class="fas fa-chart-line"></i> Analyse de Données
+        </h1>
+        <p class="lead text-white">Visualisations et statistiques complètes</p>
+    </div>
+</div>
+
+<!-- Statistiques générales -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-database fa-3x text-primary mb-2"></i>
+                <h2 class="display-5">{{ total_crops }}</h2>
+                <p class="text-muted mb-0">Échantillons Dataset</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-brain fa-3x text-success mb-2"></i>
+                <h2 class="display-5">{{ total_predictions }}</h2>
+                <p class="text-muted mb-0">Prédictions Effectuées</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-seedling fa-3x text-warning mb-2"></i>
+                <h2 class="display-5">22</h2>
+                <p class="text-muted mb-0">Cultures Supportées</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-percentage fa-3x text-info mb-2"></i>
+                <h2 class="display-5">99.5%</h2>
+                <p class="text-muted mb-0">Précision Modèle</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphiques principaux -->
+<div class="row g-4 mb-4">
+    <!-- Distribution des cultures prédites -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Distribution des Prédictions
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="cropDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribution du dataset -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar"></i> Distribution du Dataset
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="datasetDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphiques secondaires -->
+<div class="row g-4 mb-4">
+    <!-- Prédictions par mois -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt"></i> Évolution des Prédictions
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="predictionsByMonthChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top villes -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-map-marker-alt"></i> Top 10 Villes
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="topCitiesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Moyennes N-P-K par culture -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-layer-group"></i> Moyennes N-P-K par Culture (Dataset)
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="cropAveragesChart" style="height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques des paramètres -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-table"></i> Statistiques des Paramètres (Dataset)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Paramètre</th>
+                                <th>Minimum</th>
+                                <th>Maximum</th>
+                                <th>Moyenne</th>
+                                <th>Plage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Azote (N)</strong></td>
+                                <td>{{ param_stats.N.min|floatformat:2 }}</td>
+                                <td>{{ param_stats.N.max|floatformat:2 }}</td>
+                                <td>{{ param_stats.N.avg|floatformat:2 }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phosphore (P)</strong></td>
+                                <td>{{ param_stats.P.min|floatformat:2 }}</td>
+                                <td>{{ param_stats.P.max|floatformat:2 }}</td>
+                                <td>{{ param_stats.P.avg|floatformat:2 }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Potassium (K)</strong></td>
+                                <td>{{ param_stats.K.min|floatformat:2 }}</td>
+                                <td>{{ param_stats.K.max|floatformat:2 }}</td>
+                                <td>{{ param_stats.K.avg|floatformat:2 }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Température (°C)</strong></td>
+                                <td>{{ param_stats.temperature.min|floatformat:2 }}</td>
+                                <td>{{ param_stats.temperature.max|floatformat:2 }}</td>
+                                <td>{{ param_stats.temperature.avg|floatformat:2 }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-danger" style="width: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Humidité (%)</strong></td>
+                                <td>{{ param_stats.humidity.min|floatformat:2 }}</td>
+                                <td>{{ param_stats.humidity.max|floatformat:2 }}</td>
+                                <td>{{ param_stats.humidity.avg|floatformat:2 }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>pH</strong></td>
+                                <td>{{ param_stats.ph.min|floatformat:2 }}</td>
+                                <td>{{ param_stats.ph.max|floatformat:2 }}</td>
+                                <td>{{ param_stats.ph.avg|floatformat:2 }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-secondary" style="width: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Précipitations (mm)</strong></td>
+                                <td>{{ param_stats.rainfall.min|floatformat:2 }}</td>
+                                <td>{{ param_stats.rainfall.max|floatformat:2 }}</td>
+                                <td>{{ param_stats.rainfall.avg|floatformat:2 }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // Données des graphiques
+    const chartData = {{ chart_data_json| safe }};
+
+    // Configuration des couleurs
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
+        '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+    ];
+
+    // 1. Distribution des prédictions (Pie Chart)
+    const ctx1 = document.getElementById('cropDistributionChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'pie',
+        data: {
+            labels: chartData.crop_distribution.labels,
+            datasets: [{
+                data: chartData.crop_distribution.data,
+                backgroundColor: colors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 15,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                title: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // 2. Distribution du dataset (Bar Chart)
+    const ctx2 = document.getElementById('datasetDistributionChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: chartData.dataset_distribution.labels,
+            datasets: [{
+                label: 'Nombre d\'échantillons',
+                data: chartData.dataset_distribution.data,
+                backgroundColor: '#2ecc71',
+                borderColor: '#27ae60',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 20
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 10
+                        },
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+
+    // 3. Prédictions par mois (Line Chart)
+    const ctx3 = document.getElementById('predictionsByMonthChart').getContext('2d');
+    new Chart(ctx3, {
+        type: 'line',
+        data: {
+            labels: chartData.predictions_by_month.labels,
+            datasets: [{
+                label: 'Nombre de prédictions',
+                data: chartData.predictions_by_month.data,
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // 4. Top villes (Horizontal Bar Chart)
+    const ctx4 = document.getElementById('topCitiesChart').getContext('2d');
+    new Chart(ctx4, {
+        type: 'bar',
+        data: {
+            labels: chartData.top_cities.labels,
+            datasets: [{
+                label: 'Nombre de prédictions',
+                data: chartData.top_cities.data,
+                backgroundColor: '#f39c12',
+                borderColor: '#e67e22',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // 5. Moyennes N-P-K par culture (Multi-bar Chart)
+    const ctx5 = document.getElementById('cropAveragesChart').getContext('2d');
+    new Chart(ctx5, {
+        type: 'bar',
+        data: {
+            labels: chartData.crop_averages.labels,
+            datasets: [
+                {
+                    label: 'Azote (N)',
+                    data: chartData.crop_averages.N,
+                    backgroundColor: '#2ecc71',
+                    borderColor: '#27ae60',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Phosphore (P)',
+                    data: chartData.crop_averages.P,
+                    backgroundColor: '#3498db',
+                    borderColor: '#2980b9',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Potassium (K)',
+                    data: chartData.crop_averages.K,
+                    backgroundColor: '#f39c12',
+                    borderColor: '#e67e22',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 10
+                        },
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
